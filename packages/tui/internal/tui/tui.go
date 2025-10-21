@@ -1455,6 +1455,13 @@ func (a Model) executeCommand(command commands.Command) (tea.Model, tea.Cmd) {
 		}
 		cmds = append(cmds, util.CmdHandler(chat.ToggleThinkingBlocksMsg{}))
 		cmds = append(cmds, toast.NewInfoToast(message))
+	case commands.PrimaryAgentsSingleModelCommand:
+		message := "Primary agents are now using single model"
+		if a.messages.PrimaryAgentsSingleModel() {
+			message = "Primary agents are now using different models"
+		}
+		cmds = append(cmds, util.CmdHandler(chat.PrimaryAgentsSingleModelMsg{}))
+		cmds = append(cmds, toast.NewInfoToast(message))
 	case commands.ModelListCommand:
 		modelDialog := dialog.NewModelDialog(a.app)
 		a.modal = modelDialog

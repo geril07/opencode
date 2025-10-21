@@ -134,6 +134,7 @@ const (
 	SessionExportCommand            CommandName = "session_export"
 	ToolDetailsCommand              CommandName = "tool_details"
 	ThinkingBlocksCommand           CommandName = "thinking_blocks"
+	PrimaryAgentsSingleModelCommand CommandName = "primary_agents_single_model"
 	ModelListCommand                CommandName = "model_list"
 	AgentListCommand                CommandName = "agent_list"
 	ModelCycleRecentCommand         CommandName = "model_cycle_recent"
@@ -271,6 +272,12 @@ func LoadFromConfig(config *opencode.Config, customCommands []opencode.Command) 
 			Description: "toggle thinking blocks",
 			Keybindings: parseBindings("<leader>b"),
 			Trigger:     []string{"thinking"},
+		},
+		{
+			Name:        PrimaryAgentsSingleModelCommand,
+			Description: "primary agents cycling single model",
+			// Keybindings: parseBindings("<leader>b"),
+			Trigger: []string{"primary_agents_single_model"},
 		},
 		{
 			Name:        ModelListCommand,

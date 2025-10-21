@@ -269,26 +269,28 @@ func (a *App) cycleMode(forward bool) (*App, tea.Cmd) {
 		return a.cycleMode(forward)
 	}
 
-	modelID := a.Agent().Model.ModelID
-	providerID := a.Agent().Model.ProviderID
-	if modelID == "" {
-		if model, ok := a.State.AgentModel[a.Agent().Name]; ok {
-			modelID = model.ModelID
-			providerID = model.ProviderID
+	if a.State.PrimaryAgentsSingleModel == nil || !*a.State.PrimaryAgentsSingleModel {
+		modelID := a.Agent().Model.ModelID
+		providerID := a.Agent().Model.ProviderID
+		if modelID == "" {
+			if model, ok := a.State.AgentModel[a.Agent().Name]; ok {
+				modelID = model.ModelID
+				providerID = model.ProviderID
+			}
 		}
-	}
 
-	if modelID != "" {
-		for _, provider := range a.Providers {
-			if provider.ID == providerID {
-				a.Provider = &provider
-				for _, model := range provider.Models {
-					if model.ID == modelID {
-						a.Model = &model
-						break
+		if modelID != "" {
+			for _, provider := range a.Providers {
+				if provider.ID == providerID {
+					a.Provider = &provider
+					for _, model := range provider.Models {
+						if model.ID == modelID {
+							a.Model = &model
+							break
+						}
 					}
+					break
 				}
-				break
 			}
 		}
 	}
@@ -380,27 +382,29 @@ func (a *App) SwitchToAgent(agentName string) (*App, tea.Cmd) {
 		}
 	}
 
-	// Set up model for the new agent
-	modelID := a.Agent().Model.ModelID
-	providerID := a.Agent().Model.ProviderID
-	if modelID == "" {
-		if model, ok := a.State.AgentModel[a.Agent().Name]; ok {
-			modelID = model.ModelID
-			providerID = model.ProviderID
+	if a.State.PrimaryAgentsSingleModel == nil || !*a.State.PrimaryAgentsSingleModel {
+		// Set up model for the new agent
+		modelID := a.Agent().Model.ModelID
+		providerID := a.Agent().Model.ProviderID
+		if modelID == "" {
+			if model, ok := a.State.AgentModel[a.Agent().Name]; ok {
+				modelID = model.ModelID
+				providerID = model.ProviderID
+			}
 		}
-	}
 
-	if modelID != "" {
-		for _, provider := range a.Providers {
-			if provider.ID == providerID {
-				a.Provider = &provider
-				for _, model := range provider.Models {
-					if model.ID == modelID {
-						a.Model = &model
-						break
+		if modelID != "" {
+			for _, provider := range a.Providers {
+				if provider.ID == providerID {
+					a.Provider = &provider
+					for _, model := range provider.Models {
+						if model.ID == modelID {
+							a.Model = &model
+							break
+						}
 					}
+					break
 				}
-				break
 			}
 		}
 	}

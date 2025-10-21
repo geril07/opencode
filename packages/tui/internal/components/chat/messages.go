@@ -35,6 +35,7 @@ type MessagesComponent interface {
 	HalfPageDown() (tea.Model, tea.Cmd)
 	ToolDetailsVisible() bool
 	ThinkingBlocksVisible() bool
+	PrimaryAgentsSingleModel() bool
 	GotoTop() (tea.Model, tea.Cmd)
 	GotoBottom() (tea.Model, tea.Cmd)
 	CopyLastMessage() (tea.Model, tea.Cmd)
@@ -44,23 +45,24 @@ type MessagesComponent interface {
 }
 
 type messagesComponent struct {
-	width, height      int
-	app                *app.App
-	header             string
-	viewport           viewport.Model
-	clipboard          []string
-	cache              *PartCache
-	loading            bool
-	showToolDetails    bool
-	showThinkingBlocks bool
-	rendering          bool
-	dirty              bool
-	tail               bool
-	partCount          int
-	lineCount          int
-	selection          *selection
-	messagePositions   map[string]int // map message ID to line position
-	animating          bool
+	width, height            int
+	app                      *app.App
+	header                   string
+	viewport                 viewport.Model
+	clipboard                []string
+	cache                    *PartCache
+	loading                  bool
+	showToolDetails          bool
+	showThinkingBlocks       bool
+	primaryAgentsSingleModel bool
+	rendering                bool
+	dirty                    bool
+	tail                     bool
+	partCount                int
+	lineCount                int
+	selection                *selection
+	messagePositions         map[string]int // map message ID to line position
+	animating                bool
 }
 
 type selection struct {
@@ -101,6 +103,7 @@ func (s selection) coords(offset int) *selection {
 
 type ToggleToolDetailsMsg struct{}
 type ToggleThinkingBlocksMsg struct{}
+type PrimaryAgentsSingleModelMsg struct{}
 type shimmerTickMsg struct{}
 
 func (m *messagesComponent) Init() tea.Cmd {
@@ -189,6 +192,10 @@ func (m *messagesComponent) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ToggleThinkingBlocksMsg:
 		m.showThinkingBlocks = !m.showThinkingBlocks
 		m.app.State.ShowThinkingBlocks = &m.showThinkingBlocks
+		return m, tea.Batch(m.renderView(), m.app.SaveState())
+	case PrimaryAgentsSingleModelMsg:
+		m.primaryAgentsSingleModel = !m.primaryAgentsSingleModel
+		m.app.State.PrimaryAgentsSingleModel = &m.primaryAgentsSingleModel
 		return m, tea.Batch(m.renderView(), m.app.SaveState())
 	case app.SessionLoadedMsg:
 		m.tail = true
@@ -1086,6 +1093,10 @@ func (m *messagesComponent) ToolDetailsVisible() bool {
 
 func (m *messagesComponent) ThinkingBlocksVisible() bool {
 	return m.showThinkingBlocks
+}
+
+func (m *messagesComponent) PrimaryAgentsSingleModel() bool {
+	return m.primaryAgentsSingleModel
 }
 
 func (m *messagesComponent) GotoTop() (tea.Model, tea.Cmd) {
