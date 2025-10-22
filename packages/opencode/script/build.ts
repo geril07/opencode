@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
-import path from "path"
 const dir = new URL("..", import.meta.url).pathname
 process.chdir(dir)
 import { $ } from "bun"
 
 import pkg from "../package.json"
-import { Script } from "@opencode-ai/script"
+import { Script as OpencodeScript } from "@opencode-ai/script"
+
+const allTargetsFlag = process.argv.includes("--all")
 
 const GOARCH: Record<string, string> = {
   arm64: "arm64",
@@ -13,7 +14,13 @@ const GOARCH: Record<string, string> = {
   "x64-baseline": "amd64",
 }
 
-const targets = [
+const Script: typeof OpencodeScript = {
+  channel: "latest",
+  preview: false,
+  version: "dev",
+}
+
+const allTargets = [
   ["windows", "x64"],
   ["linux", "arm64"],
   ["linux", "x64"],
@@ -22,6 +29,10 @@ const targets = [
   ["darwin", "x64-baseline"],
   ["darwin", "arm64"],
 ]
+
+const targets = !allTargetsFlag
+  ? allTargets.filter(([os, arch]) => os === process.platform && arch === process.arch)
+  : allTargets
 
 await $`rm -rf dist`
 
@@ -33,11 +44,6 @@ for (const [os, arch] of targets) {
   await $`CGO_ENABLED=0 GOOS=${os} GOARCH=${GOARCH[arch]} go build -ldflags="-s -w -X main.Version=${Script.version}" -o ../opencode/dist/${name}/bin/tui ../tui/cmd/opencode/main.go`
     .cwd("../tui")
     .quiet()
-
-  const watcher = `@parcel/watcher-${os === "windows" ? "win32" : os}-${arch.replace("-baseline", "")}${os === "linux" ? "-glibc" : ""}`
-  await $`mkdir -p ../../node_modules/${watcher}`
-  await $`npm pack npm pack ${watcher}`.cwd(path.join(dir, "../../node_modules")).quiet()
-  await $`tar -xf ../../node_modules/${watcher.replace("@parcel/", "parcel-")}-*.tgz -C ../../node_modules/${watcher} --strip-components=1`
 
   await Bun.build({
     sourcemap: "external",
