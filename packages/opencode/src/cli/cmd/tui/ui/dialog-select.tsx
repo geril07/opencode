@@ -107,11 +107,12 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
     })
     if (!target) return
     const y = target.y - scroll.y
-    if (y >= scroll.height) {
-      scroll.scrollBy(y - scroll.height + 1)
+    const offset = Math.trunc(scroll.height / 5)
+    if (y >= scroll.height - offset) {
+      scroll.scrollBy(y - scroll.height + 1 + offset)
     }
-    if (y < 0) {
-      scroll.scrollBy(y)
+    if (y < 0 + offset) {
+      scroll.scrollBy(y - offset)
       if (isDeepEqual(flat()[0].value, selected()?.value)) {
         scroll.scrollTo(0)
       }
