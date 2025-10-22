@@ -5,8 +5,7 @@ import { Instance } from "../project/instance"
 import { Log } from "../util/log"
 import { FileIgnore } from "./ignore"
 import { Config } from "../config/config"
-// @ts-ignore
-import { createWrapper } from "@parcel/watcher/wrapper"
+import parcelWatcher from "@parcel/watcher"
 import { lazy } from "@/util/lazy"
 
 export namespace FileWatcher {
@@ -23,10 +22,7 @@ export namespace FileWatcher {
   }
 
   const watcher = lazy(() => {
-    const binding = require(
-      `@parcel/watcher-${process.platform}-${process.arch}${process.platform === "linux" ? "-glibc" : ""}`,
-    )
-    return createWrapper(binding) as typeof import("@parcel/watcher")
+    return parcelWatcher
   })
 
   const state = Instance.state(
